@@ -20,6 +20,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -29,7 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
     public static final String CHAT_PREFS = "ChatPrefs";
     public static final String DISPLAY_NAME_KEY = "username";
 
-    // TODO: Add member variables here:
+    // Add member variables here:
     // UI references.
     private AutoCompleteTextView mEmailView;
     private AutoCompleteTextView mUsernameView;
@@ -149,9 +152,26 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Save the display name to Shared Preferences
     private void saveDisplayName() {
+
+        FirebaseUser user = mAuth.getCurrentUser();
         String displayName = mUsernameView.getText().toString();
-        SharedPreferences pref = getSharedPreferences(CHAT_PREFS, 0);
-        pref.edit().putString(DISPLAY_NAME_KEY, displayName).apply();
+
+        if (user != null) {
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(displayName)
+                    .build();
+
+            user.updateProfile(profileUpdates)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Log.d(TAG, "onComplete: Username updated");
+                        }
+                    });
+        }
+//        String displayName = mUsernameView.getText().toString();
+//        SharedPreferences pref = getSharedPreferences(CHAT_PREFS, 0);
+//        pref.edit().putString(DISPLAY_NAME_KEY, displayName).apply();
     }
 
     // Create an alert dialog to show in case registration failed
